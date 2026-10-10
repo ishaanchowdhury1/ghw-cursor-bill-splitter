@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1c18">
+  <title>Bill Splitter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1c18;
+      --bg-2: #173028;
+      --card: #1a332c;
+      --ink: #f4f7f5;
+      --muted: #a8bfb6;
+      --line: rgba(244, 247, 245, 0.1);
+      --accent: #d4f26a;
+      --accent-ink: #17300a;
+      --input: #10241e;
+      --warn: #ffb4a2;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 10% -10%, #2a5a48 0%, transparent 55%),
+        radial-gradient(800px 400px at 110% 10%, #3d4a1a 0%, transparent 50%),
+        var(--bg);
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+    }
+
+    .app {
+      width: min(100%, 420px);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 28%), var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 22px 22px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: -0.03em;
+    }
+
+    .lede {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .reset {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font: inherit;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .reset:hover,
+    .reset:focus-visible {
+      color: var(--ink);
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--input);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 14px;
+      min-height: 56px;
+    }
+
+    .input-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(212, 242, 106, 0.18);
+    }
+
+    .prefix {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 1.15rem;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      outline: none;
+      min-width: 0;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type="number"] {
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    .tip-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .tip-btn {
+      appearance: none;
+      min-height: 48px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--input);
+      color: var(--ink);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tip-btn[aria-pressed="true"] {
+      background: var(--accent);
+      color: var(--accent-ink);
+      border-color: var(--accent);
+    }
+
+    .tip-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .custom-tip {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .custom-tip.open {
+      display: block;
+    }
+
+    .people {
+      display: grid;
+      grid-template-columns: 56px 1fr 56px;
+      gap: 8px;
+    }
+
+    .step {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--input);
+      color: var(--ink);
+      border-radius: 14px;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .step:hover,
+    .step:focus-visible {
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    .step:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .results {
+      margin-top: 8px;
+      background: var(--bg-2);
+      border-radius: 18px;
+      padding: 8px 6px 6px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding: 12px 14px;
+    }
+
+    .row + .row {
+      border-top: 1px solid var(--line);
+    }
+
+    .row dt {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .row dd {
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .hero {
+      background: var(--accent);
+      color: var(--accent-ink);
+      border-radius: 14px;
+      margin: 6px;
+      padding: 16px 14px;
+      border-top: 0;
+    }
+
+    .hero dt {
+      color: var(--accent-ink);
+      opacity: 0.75;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.72rem;
+    }
+
+    .hero dd {
+      font-size: 1.55rem;
+    }
+
+    .note {
+      margin: 4px 14px 10px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      min-height: 1.2em;
+    }
+
+    .note.warn {
+      color: var(--warn);
+    }
+
+    @media (max-width: 360px) {
+      .app {
+        padding: 22px 16px 16px;
+      }
+
+      .tip-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1>Bill Splitter</h1>
+        <p class="lede">Split a bill in ₹, with tip, as you type.</p>
+      </div>
+      <button type="button" class="reset" id="reset">Reset</button>
+    </header>
+
+    <div class="field">
+      <label for="bill">Bill amount</label>
+      <div class="input-wrap">
+        <span class="prefix" aria-hidden="true">₹</span>
+        <input id="bill" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="field">
+      <label id="tip-label">Tip</label>
+      <div class="tip-row" role="group" aria-labelledby="tip-label">
+        <button type="button" class="tip-btn" data-tip="5" aria-pressed="false">5%</button>
+        <button type="button" class="tip-btn" data-tip="10" aria-pressed="true">10%</button>
+        <button type="button" class="tip-btn" data-tip="15" aria-pressed="false">15%</button>
+        <button type="button" class="tip-btn" data-tip="custom" aria-pressed="false">Custom</button>
+      </div>
+      <div class="custom-tip" id="custom-wrap">
+        <div class="input-wrap">
+          <input id="custom-tip" type="number" inputmode="decimal" min="0" step="0.1" placeholder="Tip %" aria-label="Custom tip percentage">
+          <span class="prefix" aria-hidden="true">%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="people">Number of people</label>
+      <div class="people">
+        <button type="button" class="step" id="minus" aria-label="Fewer people">−</button>
+        <div class="input-wrap">
+          <input id="people" type="number" inputmode="numeric" min="1" step="1" value="2">
+        </div>
+        <button type="button" class="step" id="plus" aria-label="More people">+</button>
+      </div>
+    </div>
+
+    <dl class="results">
+      <div class="row">
+        <dt>Tip amount</dt>
+        <dd id="tip-out">₹0.00</dd>
+      </div>
+      <div class="row">
+        <dt>Total</dt>
+        <dd id="total-out">₹0.00</dd>
+      </div>
+      <div class="row hero">
+        <dt>Each person</dt>
+        <dd id="each-out">₹0.00</dd>
+      </div>
+      <p class="note" id="note"></p>
+    </dl>
+  </main>
+
+  <script>
+    const inr = new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    const billEl = document.getElementById("bill");
+    const peopleEl = document.getElementById("people");
+    const customEl = document.getElementById("custom-tip");
+    const customWrap = document.getElementById("custom-wrap");
+    const tipButtons = [...document.querySelectorAll(".tip-btn")];
+    const tipOut = document.getElementById("tip-out");
+    const totalOut = document.getElementById("total-out");
+    const eachOut = document.getElementById("each-out");
+    const noteEl = document.getElementById("note");
+    const minusBtn = document.getElementById("minus");
+    const plusBtn = document.getElementById("plus");
+
+    let tipMode = "10";
+
+    function toPaise(raw) {
+      const text = String(raw ?? "").trim().replace(/,/g, "");
+      if (!text) return 0n;
+      const match = text.match(/^(\d+)(?:\.(\d*))?$/);
+      if (!match) return 0n;
+      const whole = match[1];
+      const frac = (match[2] || "").slice(0, 2).padEnd(2, "0");
+      return BigInt(whole) * 100n + BigInt(frac);
+    }
+
+    function roundHalfUp(n, d) {
+      return (n + d / 2n) / d;
+    }
+
+    function formatPaise(paise) {
+      const negative = paise < 0n;
+      const abs = negative ? -paise : paise;
+      const rupees = abs / 100n;
+      const leftover = abs % 100n;
+      const decimal = `${negative ? "-" : ""}${rupees.toString()}.${leftover.toString().padStart(2, "0")}`;
+      return inr.format(decimal);
+    }
+
+    function peopleCount() {
+      const n = Math.floor(Number(peopleEl.value));
+      if (!Number.isFinite(n) || n < 1) return 1;
+      return n;
+    }
+
+    function tipPercentScaled() {
+      const source = tipMode === "custom" ? customEl.value : tipMode;
+      const text = String(source ?? "").trim();
+      if (!text) return 0n;
+      const match = text.match(/^(\d+)(?:\.(\d*))?$/);
+      if (!match) return 0n;
+      const whole = BigInt(match[1]);
+      const frac = (match[2] || "").slice(0, 2).padEnd(2, "0");
+      return whole * 100n + BigInt(frac);
+    }
+
+    function setTipMode(mode) {
+      tipMode = mode;
+      tipButtons.forEach((btn) => {
+        btn.setAttribute("aria-pressed", String(btn.dataset.tip === mode));
+      });
+      customWrap.classList.toggle("open", mode === "custom");
+      if (mode === "custom") customEl.focus();
+      render();
+    }
+
+    function render() {
+      const bill = toPaise(billEl.value);
+      const people = peopleCount();
+      const tipScale = tipPercentScaled();
+      const tip = roundHalfUp(bill * tipScale, 10000n);
+      const total = bill + tip;
+      const base = total / BigInt(people);
+      const remainder = total % BigInt(people);
+      const high = remainder === 0n ? base : base + 1n;
+
+      tipOut.textContent = formatPaise(tip);
+      totalOut.textContent = formatPaise(total);
+      eachOut.textContent = formatPaise(high);
+      minusBtn.disabled = people <= 1;
+
+      const invalidBill = billEl.value !== "" && toPaise(billEl.value) === 0n && !/^0+(?:\.0*)?$/.test(billEl.value.trim());
+      if (invalidBill) {
+        noteEl.textContent = "Enter a valid amount, like 1240.50";
+        noteEl.classList.add("warn");
+        return;
+      }
+
+      noteEl.classList.remove("warn");
+      if (people === 1) {
+        noteEl.textContent = "Paying solo — no split needed.";
+      } else if (remainder === 0n) {
+        noteEl.textContent = `Split evenly across ${people} people.`;
+      } else {
+        const extra = Number(remainder);
+        noteEl.textContent = `${extra} ${extra === 1 ? "person pays" : "people pay"} ${formatPaise(high)}; the rest pay ${formatPaise(base)}.`;
+      }
+    }
+
+    billEl.addEventListener("input", render);
+    peopleEl.addEventListener("input", render);
+    customEl.addEventListener("input", () => {
+      if (tipMode !== "custom") setTipMode("custom");
+      else render();
+    });
+
+    tipButtons.forEach((btn) => {
+      btn.addEventListener("click", () => setTipMode(btn.dataset.tip));
+    });
+
+    minusBtn.addEventListener("click", () => {
+      peopleEl.value = String(Math.max(1, peopleCount() - 1));
+      render();
+    });
+
+    plusBtn.addEventListener("click", () => {
+      peopleEl.value = String(peopleCount() + 1);
+      render();
+    });
+
+    document.getElementById("reset").addEventListener("click", () => {
+      billEl.value = "";
+      peopleEl.value = "2";
+      customEl.value = "";
+      setTipMode("10");
+      billEl.focus();
+    });
+
+    render();
+  </script>
+</body>
+</html>
